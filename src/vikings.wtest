@@ -1,0 +1,101 @@
+import vikings.*
+
+describe "test para el punto 1" {
+
+	test "Un vikingo Thrall granjero puede ir a una expedicion" {
+		const ragnar = new Granjero(casta = thrall, cantidadHijos = 2, cantidadDeHectarias = 5)
+		assert.that(ragnar.puedeSubirAUnaExpedicion())
+	}
+
+	test "Un vikingo Thrall granjero no puede ir a una expedicion porque no tiene las hectarias suficientes para la cantidad de hijos que posee" {
+		const ragnar = new Granjero(casta = thrall, cantidadHijos = 4, cantidadDeHectarias = 5)
+		assert.notThat(ragnar.puedeSubirAUnaExpedicion())
+	}
+
+	test "El vikingo no puede subir a la expedicion y se anuncia por expecion" {
+		const ragnar = new Granjero(casta = thrall, cantidadHijos = 4, cantidadDeHectarias = 5)
+		const expedicion = new Expediciones()
+		assert.throwsExceptionWithMessage("El vikingo ingresado no puede subir a la expedicion", { expedicion.subirVikingo(ragnar)})
+	}
+
+}
+
+describe "test para el punto 2" {
+
+	const ragnar = new Granjero(casta = thrall, cantidadHijos = 2, cantidadDeHectarias = 5)
+	const ragnarHijo = new Granjero(casta = thrall, cantidadHijos = 2, cantidadDeHectarias = 5)
+	const expedicion = new Expediciones()
+	const capital = new Capital()
+
+	method initialize() {
+		expedicion.incorporarVikingos([ ragnar, ragnarHijo ])
+	}
+
+	test "Una expedicion vale la pena" {
+		expedicion.incorporarLugares([ capital ])
+		assert.that(expedicion.valeLaPena())
+	}
+
+	test "Una expedicion no vale la pena porque no lograron la cantidad de muertes necesarias" {
+		capital.defensoresDerrotados(1)
+		expedicion.incorporarLugares([ capital ])
+		assert.notThat(expedicion.valeLaPena())
+	}
+
+}
+
+describe "test para el punto 3" {
+
+	const ragnar = new Granjero(casta = thrall, cantidadHijos = 2, cantidadDeHectarias = 5, vidasCobradas = 38)
+	const ragnarHijo = new Granjero(casta = thrall, cantidadHijos = 2, cantidadDeHectarias = 5, vidasCobradas = 22)
+	const expedicion = new Expediciones()
+
+	method initialize() {
+		expedicion.incorporarVikingos([ ragnar, ragnarHijo ])
+	}
+
+	test "Hacer una expedicion en una capital" {
+		const capital = new Capital()
+		expedicion.incorporarLugares([ capital ])
+		expedicion.realizarExpedicion()
+		assert.equals(39, ragnar.vidasCobradas())
+		assert.equals(23, ragnarHijo.vidasCobradas())
+		assert.equals(17, ragnar.botinAcumulado())
+		assert.equals(17, ragnarHijo.botinAcumulado())
+	}
+
+	test "Hacer una expedicion en una aldea" {
+		const aldea = new Aldea()
+		expedicion.incorporarLugares([ aldea ])
+		expedicion.realizarExpedicion()
+		assert.equals(18, ragnar.botinAcumulado())
+		assert.equals(18, ragnarHijo.botinAcumulado())
+	}
+
+}
+
+describe "test para el punto 4" {
+
+	const ragnar = new Granjero(casta = jarl)
+
+	test "Hacer que un vikingo Jarl suba de casta" {
+		ragnar.escalarSocialmente()
+		assert.equals(karl, ragnar.casta())
+	}
+
+	test "Hacer que un vikingo Jarl suba de casta hasta ser thrall" {
+		ragnar.escalarSocialmente()
+		ragnar.escalarSocialmente()
+		assert.equals(thrall, ragnar.casta())
+	}
+
+	test "Hacer que un vikingo Jarl suba de casta hasta ser thrall y no puede subir mas de eso" {
+		ragnar.escalarSocialmente()
+		ragnar.escalarSocialmente()
+		ragnar.escalarSocialmente()
+		ragnar.escalarSocialmente()
+		assert.equals(thrall, ragnar.casta())
+	}
+
+}
+
